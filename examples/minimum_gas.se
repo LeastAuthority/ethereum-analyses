@@ -1,0 +1,23 @@
+def doWork(a,b):
+   # Do some silly irrelevant work
+   i = a
+   j = 1
+   while i <= b:
+      j *= i
+      self.storage[a] = j
+      i += 1
+   return([j,tx.gas]:arr)
+
+// A transaction that calls "main" is guaranteed to produce at least mingas for the miner
+def main(mingas, worker):
+    // Store the original input gas
+    gaslimit = tx.gas
+
+    // Do the real 'work' by creating a new message (to the same contract)
+    a = self.doWork(10, 15, gas=tx.gas-50, outitems=2)
+
+    // If not, busy loop until we spend at least mingas
+    while (gaslimit - tx.gas < mingas):
+       continue
+
+    return([a[0],a[1],tx.gas]:arr)

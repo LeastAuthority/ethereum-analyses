@@ -1,0 +1,44 @@
+def init():
+   # This fills up the trie in the worst possible way. 
+   # The target key is '0'. Consider the path to the target key after initialization.
+   # Every node on this path is a "BRANCH", which contains 16 hashes (no patricia compression, 
+   # and no inline nodes). Accessing the target index thus incurs the worst-case cost.
+   accum = 16*16
+   v = sha3('cow')
+   self.storage[0] = v
+   with i = 0:
+      while i < 10:
+         with j = 1:
+            while j < 16:
+               k = accum*j
+               self.storage[k] = v
+               j += 1
+         accum *= 16
+         i += 1
+         # Fill some nonzero elements at the bottom
+         i = 0
+         while i < 16*16:
+            self.storage[i] = v
+            i += 1
+
+def waste_steps(n):
+   with i = 0:
+      while i < n:
+         self.storage[i] = 0  # These steps are cheap
+         i += 1
+   #invalid()               # Revert the state by throwing exception
+   return(1) // OK
+
+def waste_steps_outer(n):
+   i = 0
+   while i < n:
+      pre = tx.gas
+      a = self.waste_steps(16*16)   # Call the time_waster in a loop
+      post = tx.gas
+      return([pre,post,a]:arr)
+      i += 1
+   return(1)
+
+def main(k):
+   return(3, items=1)
+   //return([2,3]:arr) // Otherwise do nothing

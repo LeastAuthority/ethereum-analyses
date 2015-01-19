@@ -1,0 +1,96 @@
+Andrew Miller, Feb 1 '15
+I spent several hours today studying Ethereum, thinking about attacks and analysis strategies, and hacking on contracts in pyethereum. Notes collected below:
+
+Ethereum:
+Yellow paper questions:
+       “The astute reader will realise that this implies that no instruction can, through its execution, cause an exceptional halt.” ← What does mean?
+       Out-of-gas is abbreviate (OOG) but then that’s never used again
+       “The machine can have exceptional execution for several reasons, including stack underflows and invalid instructions. These unambiguously and validly result in immediate halting of the machine with all state changes left intact.”
+
+
+
+Idea:
+- What happens if we insert keys into the Trie such that we utilize the *worst case* storage? Example:
+the key “aaaaaaaaaa”, where the tree also contains
+“ab”, “aab”, “aab”, “aaab”, etc.
+Patricia compression can’t account for much in this case. 
+A possible mitigation would be to hash every key before placing it in storage.
+  
+  - Observation: the keys in the tree are 32 byte values, zeropadded based on the byte. https://github.com/ethereum/pyethereum/blob/deb5a5588242f8e0aa3801b3c598455f9a2f8531/pyethereum/blocks.py#L542
+  How bad could this be? The modified patricia trie has a ‘nibble’ stored at each level. Since there are 256 bits, that means potentially 64 levels. Also, each level can have up to 17 elements. Since they are RLP-encoded before hashing, in the worst case we fill up each relevant level so there are 17*64 elements.
+
+
+Idea: - What happens when there is a “suicide” inside an exceptional message call?
+      General remark:
+      	      There is a partition between “transaction” execution and “message execution”. Interesting differences lie at this interface. For example, the first message processed while executing in a transaction must come from an “account”, whereas other messages come from contracts.
+	      Observations:
+		The “suicide” is appended to a log list
+
+Idea:
+	There is a ZERO gas cost for setting a sstore value to zero. According to yellow paper, not even the base ‘step’ is charged. This is bad because the implementation clearly requires a fetch (the same as a READ) in order to check this cost. 
+	Furthermore, if an exception is later encountered, the storage is reverted so none of the storage reduction actually takes place.
+	Thus, a good way to use up a lot of time (for little gas) would be to fill up the storage, and create a lot of instructions that pick random locations and set them to zero, then finally have an exception at the end.
+
+Idea: 
+How much “Memory” can a contract use? Does this correspond to actual RAM on the verifier’s machine?
+    
+
+
+Higher level thoughts:
+       The main resources in the virtual machine are:
+       - contract storage
+       - primitive computations (sha3)
+       - the stack
+       - “memory”
+       - the set of active contracts / accounts
+       - the “logs” and “suicide” list
+
+
+
+Ethereum procedural notes, Feb 1:
+	 - Switched to using ‘tester’
+	 - Made sure pyethereum and serpent are both in the most recent ‘develop’ branch, and tests pass python -m pytest tests/test_contracts
+
+
+TODO:
+	- Write code to visualize the trie, like in graphviz?
+	- Try benchmarks on operations involving the trie
+
+
+Observations:
+	Gas limit, per block - calculated based on a moving average involving the gas used in previous blocks
+	Analogy is to Bitcoin block size, which we only partially understand.
+
+Other ideas:
+
+High level thought:
+     - Are there ways for the incentives to “escape” the gas system? The general assumption is that miners will use the gas price offered by a transaction in order to determine whether the transaction is “fair”. On the other hand, the size and validation cost of a block affects other miners who receive the block. They have no direct incentive response involving the fees collected within a prior block.
+     On the other hand, blocks that take a long time to verify are dangerous to mine on, because if you mine on them, then other nodes will take longer to build on them - you have a greater chance of losing your reward. GHOST reduces this incentive. It can have the effect of encouraging miners to include more costly-to-verify transactions, up until the gas limit.
+     As far as affecting block propagation after a block is mined, only the *actual computational cost* of the transaction matters, not the gas used or the gas price.
+     The effect of the gas price and gas provided is that a miner who receives an *incoming transaction* can BOUND the verification cost (above) and the fee it earns (below), and hence can more effectively schedule the computation of new blocks/states.
+     This also affects relays in a different way. While miners need to compute new block states, relayers *only* need to determine if the transaction is valid. They do not need to check the computation state. Hence relayers can safely skip the entire update process. Double spends can still be avoided via address/nonces.
+     What about Red Balloons? Relayers typically have no particular incentive to participate at all. So far this isn’t a problem, on the other hand transaction volume is kept low by Bitcoin’s social stewardship. Bitcoin transaction outputs support a kind of incentive routing using transaction outputs. Does Ethereum support that?
+
+     One of Ethereum’s unusual aspects is the dynamic gas limit per block. Gas limit is effectively a limit on the computational cost of validating a block. In Bitcoin, there’s a *fixed* and hotly debated limit on the size, but the cost of verifying transactions is roughly constant.
+
+     Main impact on the gas system is that it allows miners to predict the cost of validating a transaction vs the fee of including it.
+
+
+Operations that are missing in Ethereum:
+	   - Ability to refer to another contract’s code besides the one being operated on.
+	     Can always rely on external validators. Can parse a block using byte operations.
+	     - Ability to perform ‘range scan’ on the storage keys, which is supported by the data structure and might be useful
+	     - “Turing complete” is less relevant, compared to what validation rules are enforceable with regard to the stream. Can ethereum “SPV” check itself?
+	     - Ability to make transactions conditionally depend on previous transactions?
+	       Can probably be simulated by a gadget.
+	       	   Would be able to be simulated by SPV proofs…. see also: transaction receipts.
+
+
+
+-----
+Report from during Financial Crypto.... Jan 25 - Jan 30
+I spent several hours thinking and talking about the ASIC-resistant Proof-of-Work, and studying the wiki materials about it. 
+- The fact that Ethereum claims that GPUs and low-cost-ASICs are a primary goal, yet they have not *developed* GPU miner code or FPGA prototypes is troubling. I have idled in their skype channel and observed that they are tweaking the spec interactively as they code it, adjusting parameters to tune for the environment they're developing in... which, bafflingly, is currently *Javascript*. Despite the improvements in JIT recently, I'm confident they are not getting fine-grained control of the machine this way. This includes use of specialty SIMD vector instructions, memory prefetching / pipelining... and worse, it has no alignment. I think it would be wiser to spend some resources developing 
+- 
+
+

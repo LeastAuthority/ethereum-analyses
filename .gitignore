@@ -1,0 +1,5 @@
+*.html
+*.pdf
+*.versioned.md
+*.versioned.rst
+/LAE-Ethereum-Report.pdf
