@@ -53,7 +53,7 @@ Second, one of the arguments for the long-term rationality of *honest* Bitcoin m
 ### GPU-friendly, ASIC-resistant
 
 The Ethash design is intended to be maximally efficient on high-end GPUs, with a minimal potential performance gain for customized hardware. An alternative design approach would be to make even ordinary CPUs as effective as GPUs. The rationale for preferring the former rather than latter is summarised by the following quote from the wiki: "Targeting CPUs is almost certainly impossible." This is illustrated by the following stylized graph of the performance of CPUs, GPUs, and ASICs:
-![Stylized illustration of rationale behind GPU-friendly vs CPU-friendly](images/gpufriendly.png)
+![Stylized illustration of rationale behind GPU-friendly vs CPU-friendly](./images/gpufriendly.png)
 
 The argument is that general purpose CPUs are optimized in performance characterics for which we are unable to tune a proof-of-work puzzle, such as the ability to run in slower modes or power down portions of the chip, to perform out-of-order execution optimizations, etc.
 
@@ -224,10 +224,10 @@ attempt(puz, nonce):
 If the hybrid strategy encounters an index outside its stored portion of the Dataset before the `S`th iteration, then it abandons that attempt; after the `S`th iteration, the hybrid strategy computes the next value the hard way, using the Cache. Assuming the cost of computing an element from Cache is some fixed factor slower than fetching it from the Dataset (e.g., because fetches from Cache and from Dataset together must utilize the GPUs bandwidth), then for some value of `S`, this hybrid strategy is the *optimal* approach to mining. 
 
 In the following figure we illustrate how the `S` value of the optimal strategy changes along with the portion of the Dataset stored, assuming that computing a Dataset element takes 1024x as long as fetching it from memory. When more than 94% of the dataset is stored, 'misses' are infrequent enough that it is more cost effective to abort and try again when one is encountered, even if it occurs on the very last iteration. However, as misses become more common, it is better to incur the higher cost of computing a dataset element on the fly.
-![S value of the optimal hybrid mining strategy](figure_1.png)
+![S value of the optimal hybrid mining strategy](./images/figure_1.png)
 
 Regardless of the optimal hybrid strategy, the cost of missees quickly adds up. The following figure illustrates the effective mining efficiency of the optimal hybrid strategy given varying portions of the Dataset stored. As one example: given the rate of Datset size increase of ~735MB per year, when 2GB cards begin to lose efficiency (16 months from now), they will drop from 100% to 50% efficient over a timespan of roughly three weeks.
-![Efficiency of optimal hybrid mining strategy](figure_2.png)
+![Efficiency of optimal hybrid mining strategy](./images/figure_2.png)
 
 _Recommendation: do not automatically increase the dataset size, or increase it at a very slow rate. Wait for the 9-month overhaul, then observe trends in GPU memory size and other hardware to decide about increasing the dataset size._
 

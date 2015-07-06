@@ -426,7 +426,7 @@ Storage operations may incur much greater actual costs than their assigned gas v
 
 By choosing keys with deliberate patterns, a contract can cause the storage trie to become significantly unbalanced. Afterwards, storage operations will cost significantly more CPU than their gas price would suggest. This could be used as a DoS attack against miners.
 
-![Illustration of worst-case trie layout](illustration_badlayout.png)
+![Illustration of worst-case trie layout](./images/illustration_badlayout.png)
 
 _Recommendation: consider using `hash(key)` rather than `key` in storage trie to prevent users from "stacking" the storage in a poor configuration. The (significant) downside is that the trie would become completely sparse, losing the trie's space-saving key-compression properties._
 
