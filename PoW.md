@@ -148,6 +148,7 @@ _Recommendation: communicate with the password hashing community as a source of 
 #### Multiple reference implementations
 
 The various Ethereum reference implementations have been developed concurrently (along with the yellowpaper specification), in several different languages:
+* Go
 * Javascript
 * Python
 * C++
